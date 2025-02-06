@@ -10,3 +10,4 @@ export const PLAYERS = [{
     id: 1,
     symbol: SYMBOL_X
 }];
+

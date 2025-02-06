@@ -1,58 +1,21 @@
 import Board from './Board.tsx'
-import { useEffect, useRef, useState } from "react";
-import { CellValue, UpdateBoardState } from './types';
-import { BOARD_SIZE, EMPTY_SYMBOL, PLAYERS, SYMBOL_O } from './constants';
+import GameStateInfo from './GameStateInfo';
+import { useRef, useState } from "react";
+import { UpdateBoardState, GameState } from '../util/types';
+import { BOARD_SIZE, EMPTY_SYMBOL, PLAYERS } from '../util/constants';
 import PlayerInfo from './PlayerInfo';
-
-
-function getInitCellVals(): CellValue[] {
-    return Array.from({length: BOARD_SIZE * BOARD_SIZE}, (_, idx) => ({id: idx, symbol: EMPTY_SYMBOL, isWinCell: false}));
-}
-
-
-function getWinIndexes() {
-    const mainDiagonalIndexes = [];
-    for (let diagonalIdx = 0; diagonalIdx < BOARD_SIZE * BOARD_SIZE; diagonalIdx += (BOARD_SIZE + 1)) {
-        mainDiagonalIndexes.push(diagonalIdx);
-    }
-
-    const antiDiagonalIndexes = [];
-    for (let diagonalIdx = BOARD_SIZE - 1; diagonalIdx < BOARD_SIZE * BOARD_SIZE - 1; diagonalIdx += (BOARD_SIZE - 1)) {
-        antiDiagonalIndexes.push(diagonalIdx);
-    }
-
-    const winIndexes = [mainDiagonalIndexes, antiDiagonalIndexes];
-
-    for (let rowStartIdx = 0; rowStartIdx < BOARD_SIZE * BOARD_SIZE; rowStartIdx += BOARD_SIZE) {
-        const rowWinIndexes = [];
-
-        for (let colIdx = rowStartIdx; colIdx < rowStartIdx + BOARD_SIZE; colIdx++) {
-            rowWinIndexes.push(colIdx);
-        }
-
-        winIndexes.push(rowWinIndexes);
-    }
-
-    for (let colStartIdx = 0; colStartIdx < BOARD_SIZE; colStartIdx++) {
-        const colWinIndexes = [];
-
-        for (let rowIdx = colStartIdx; rowIdx < BOARD_SIZE * BOARD_SIZE; rowIdx += BOARD_SIZE) {
-            colWinIndexes.push(rowIdx);
-        }
-
-        winIndexes.push(colWinIndexes);
-    }
-
-    return winIndexes;
-}
+import { getInitCellVals, getWinConditionCheckIndexes } from '../util/util';
 
 
 export default function MainBody() {
     const [cellVals, setCellVals] = useState(getInitCellVals());
     const [activePlayerId, setActivePlayerId] = useState(0)
-    const [isGameInProgress, setIsGameInProgress] = useState(false);
+    //const [isGameInProgress, setIsGameInProgress] = useState(false);
     const [boardHistory, setBoardHistory] = useState<number[]>([]);
-    const winIndexes = useRef(getWinIndexes());
+    // const [gameStatus, setGameStatus] = useState('');
+    // const [winningPlayerId, setWinningPlayerId] = useState(-1);
+    const [gameState, setGameState] = useState(GameState.IN_PROGRESS);
+    const winConditionCheckIndexes = useRef(getWinConditionCheckIndexes());
 
     function getCurSymbol() {
         return PLAYERS[activePlayerId].symbol;
@@ -68,8 +31,8 @@ export default function MainBody() {
         }))
     }
 
-    function getWinner(lastMoveCellId: number, lastMovePlayerId: number) {
-        for (const winIndexesArr of winIndexes.current) {
+    function getWinningIndexes(lastMoveCellId: number, lastMovePlayerId: number) {
+        for (const winIndexesArr of winConditionCheckIndexes.current) {
             if (cellVals[winIndexesArr[0]].symbol == EMPTY_SYMBOL || !winIndexesArr.includes(lastMoveCellId)) {
                 continue;
             }
@@ -99,36 +62,41 @@ export default function MainBody() {
         updateCellSymbol(cellId);
         setBoardHistory(prevBoardHistory => [...prevBoardHistory, cellId]);
 
-        const winner = getWinner(cellId, activePlayerId);
+        const winningIndexes = getWinningIndexes(cellId, activePlayerId);
 
-        if (winner != null) {
-            console.log('win ', winner);
-
+        if (winningIndexes != null) {
             setCellVals(prevCellVals => {
-                for (const winIdx of winner) {
+                for (const winIdx of winningIndexes) {
                     prevCellVals[winIdx].isWinCell = true;
                 }
 
                 return prevCellVals;
             })
 
-            setIsGameInProgress(false);
+            // setWinningPlayerId(activePlayerId);
+            // setGameStatus(getGameStatusMessage(activePlayerId));
+            // setIsGameInProgress(false);
+
+            setGameState(activePlayerId == 0 ? GameState.PLAYER_1_WIN : GameState.PLAYER_2_WIN);
         } else if (boardHistory.length == BOARD_SIZE * BOARD_SIZE - 1) {
-            console.log('draw');
-            setIsGameInProgress(false);
+            // setGameStatus(getGameStatusMessage(null));
+            // setIsGameInProgress(false);
+
+            setGameState(GameState.DRAW)
         } else {
             toggleActivePlayer();
-            setIsGameInProgress(true);
+            // setIsGameInProgress(true);
+
+            setGameState(GameState.IN_PROGRESS)
         }
     };
-    
-    //useEffect(checkGameEndConditions, cellVals);
 
     function resetBoard() {
         setCellVals(getInitCellVals());
         setBoardHistory([]);
-        setActivePlayerId(0);
-        setIsGameInProgress(false);
+        // setActivePlayerId(0);
+        // setIsGameInProgress(false);
+        setGameState(GameState.IN_PROGRESS);
     }
 
     function undoLastMove() {
@@ -144,16 +112,18 @@ export default function MainBody() {
     return (
         <div id='main-body'>
 
-            <Board cellVals={cellVals} updateBoardState={updateBoardState} />
+            <Board cellVals={cellVals} updateBoardState={updateBoardState} isGameInProgress={gameState === GameState.IN_PROGRESS} />
+
+            <GameStateInfo gameState={gameState} />
 
             <div id='action-bar'>
-                <PlayerInfo key={0} id={0} isActive={activePlayerId === 0} />
+                <PlayerInfo key={0} id={0} isActive={activePlayerId === 0} isWinner={gameState === GameState.PLAYER_1_WIN} />
 
-                <button onClick={resetBoard}>{isGameInProgress ? 'Reset' : 'Start'}</button>
+                <button onClick={resetBoard}>{gameState == GameState.IN_PROGRESS ? 'Reset' : 'Start'}</button>
 
-                <button onClick={undoLastMove} disabled={!isGameInProgress}>Undo</button>
+                <button onClick={undoLastMove} disabled={gameState != GameState.IN_PROGRESS}>Undo</button>
 
-                <PlayerInfo key={1} id={1} isActive={activePlayerId === 1} />
+                <PlayerInfo key={1} id={1} isActive={activePlayerId === 1} isWinner={gameState === GameState.PLAYER_2_WIN} />
             </div>
         </div>
     );
