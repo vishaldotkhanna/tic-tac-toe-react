@@ -50,7 +50,7 @@
 
 #board {
   display: grid;
-  grid-template-columns: repeat(3, 1fr);
+  grid-template-columns: repeat(var(--board-size), 1fr);
   height: 80%;
   width: 80%;
   margin-top: 10%;
