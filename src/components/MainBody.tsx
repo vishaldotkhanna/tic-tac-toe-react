@@ -106,20 +106,21 @@ export default function MainBody() {
     
 
     return (
-        <div id='main-body'>
+        <div className="mx-auto w-[80vw] h-[80vh] flex flex-col items-center gap-10">
 
             <Board cellVals={cellVals} updateBoardState={updateBoardState} isGameInProgress={gameState === GameState.IN_PROGRESS} boardSize={boardSize} />
 
-            <GameStateInfo gameState={gameState} />
+            <GameStateInfo className="h-[20%]" gameState={gameState} />
 
-            <div id='action-bar'>
+            <div className="flex flex-row w-[100%] justify-center items-center gap-8 mt-4">
                 <PlayerInfo key={0} id={0} isActive={activePlayerId === 0} isWinner={gameState === GameState.PLAYER_1_WIN} />
 
-                <input type="number" id="board-size" name="board-size" min="3" max="8" step="1" value={boardSize} onChange={updateBoardSize} />
+                <label for="board-size">Board Size:</label>
+                <input type="number" id="board-size" name="board-size" min="3" max="8" step="1" value={boardSize} className="text-center" onChange={updateBoardSize} />
 
                 <button onClick={() => resetBoard(boardSize)}>{gameState == GameState.IN_PROGRESS ? 'Reset' : 'Start'}</button>
 
-                <button onClick={undoLastMove} disabled={gameState != GameState.IN_PROGRESS}>Undo</button>
+                <button onClick={undoLastMove} disabled={gameState != GameState.IN_PROGRESS || boardHistory.length === 0} className="disabled:opacity-30 disabled:cursor-not-allowed">Undo</button>
 
                 <PlayerInfo key={1} id={1} isActive={activePlayerId === 1} isWinner={gameState === GameState.PLAYER_2_WIN} />
             </div>

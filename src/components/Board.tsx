@@ -7,8 +7,11 @@ export default function Board({ cellVals, updateBoardState, isGameInProgress, bo
     const cellComponents = cellVals.map((cellVal) => <Cell key={cellVal.id} cellValue={cellVal} updateBoardState={updateBoardState} isGameInProgress={isGameInProgress} />);
 
     return (
-        <div id='board' style={{"--board-size": boardSize}}>
-            {cellComponents}
+        <div className="w-[80%] h-[80%] flex items-center justify-center">
+            <div className= "max-w-[100%] max-h-[100%] grid" style={{gridTemplateColumns: `repeat(${boardSize}, 1fr)`, gridTemplateRows: `repeat(${boardSize}, 1fr)`}}>
+                {cellComponents}
+            </div>
         </div>
     );
 }
+

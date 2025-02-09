@@ -12,6 +12,6 @@ export default function GameStateInfo({ gameState }: { gameState: GameState }) {
     }
 
     return (
-        <div id='game-status'>{gameStatusMessage}</div>
+        <div className="h-[20%]">{gameStatusMessage}</div>
     );
 }
