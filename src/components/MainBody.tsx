@@ -106,7 +106,7 @@ export default function MainBody() {
     
 
     return (
-        <div className="mx-auto w-[80vw] h-[80vh] flex flex-col items-center gap-10">
+        <div className="w-[80vw] h-[80vh] flex flex-col items-center gap-10">
 
             <Board cellVals={cellVals} updateBoardState={updateBoardState} isGameInProgress={gameState === GameState.IN_PROGRESS} boardSize={boardSize} />
 
