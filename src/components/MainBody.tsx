@@ -1,6 +1,6 @@
 import Board from './Board.tsx'
 import GameStateInfo from './GameStateInfo';
-import { ChangeEvent, SyntheticEvent, useRef, useState } from "react";
+import { ChangeEvent, useRef, useState } from "react";
 import { UpdateBoardState, GameState } from '../util/types';
 import { DEFAULT_BOARD_SIZE, EMPTY_SYMBOL, PLAYERS } from '../util/constants';
 import PlayerInfo from './PlayerInfo';
@@ -115,7 +115,7 @@ export default function MainBody() {
             <div className="flex flex-row w-[100%] justify-center items-center gap-8 mt-4">
                 <PlayerInfo key={0} id={0} isActive={activePlayerId === 0} isWinner={gameState === GameState.PLAYER_1_WIN} />
 
-                <label for="board-size">Board Size:</label>
+                <label>Board Size:</label>
                 <input type="number" id="board-size" name="board-size" min="3" max="8" step="1" value={boardSize} className="text-center" onChange={updateBoardSize} />
 
                 <button onClick={() => resetBoard(boardSize)}>{gameState == GameState.IN_PROGRESS ? 'Reset' : 'Start'}</button>

@@ -1,5 +1,5 @@
 import { CellValue } from './types';
-import { boardSize, EMPTY_SYMBOL } from './constants';
+import { EMPTY_SYMBOL } from './constants';
 
 export function getInitCellVals(boardSize: number): CellValue[] {
     return Array.from({ length: boardSize * boardSize }, (_, idx) => ({ id: idx, symbol: EMPTY_SYMBOL, isWinCell: false }));
